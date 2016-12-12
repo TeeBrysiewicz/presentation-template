@@ -10,7 +10,7 @@
 		<meta name="author" content="Tobias Robert Brysiewicz">
 
 		<link rel="stylesheet" href="css/reveal.css">
-		<link rel="stylesheet" href="css/theme/black.css">
+		<link rel="stylesheet" href="css/theme/beige.css">
 
 		<meta name="apple-mobile-web-app-capable" content="yes">
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -35,27 +35,190 @@
 
 			<!-- Opening Slide -->
 				<section>
-					<h1>Reveal.js</h1>
-					<h3>The HTML Presentation Framework</h3>
+					<h1>Custom Keyboards</h1>
+					<h3>Native iOS &amp; Swift</h3>
 					<p>
 						<small>Created by <a href="http://tobiasrobertbrysiewicz.com">Tobias Robert Brysiewicz</a></small>
 					</p>
+					<small>Built on <a href="https://github.com/hakimel/reveal.js/">Reveal.js</a></small>
 				</section>
 
 				<section>
-					<h2>Hello World</h2>
+					<h2>Road Map:</h2>
+					<ol>
+						<li>Why - create custom keyboards?</li>
+						<li>What - do we need to get started?</li>
+						<li>How - are we going to do this?</li>
+					</ol>
+				</section>
+
+				<!-- Why Slide -->
+				<section>
+					<section id="fragments">
+						<h2>Why?</h2>
+						<p class="fragment fade-up">Fun</p>
+						<p class="fragment fade-up">Expresive</p>
+						<p class="fragment fade-up">Unique</p>
+						<p class="fragment fade-up">Another thing to program.</p>
+					</section>
+				</section>
+
+
+
+				<!-- What Slide -->
+				<section>
+					<h2>What?</h2>
+					<ol>
+						<li>xCode</li>
+					</ol>
+				</section>
+
+				<!-- How Slide -->
+				<section>
+					<h2>How?</h2>
+					<p><a href="https://www.appcoda.com/custom-keyboard-tutorial/">App Coda Tutorial</a></p>
+				</section>
+
+				<!-- Begin Technicals -->
+				<section>
+					<h2>Create New Project</h2>
+					<p>Click on the project in the Project Navigator then select Editor > Add Target > iOS > Application Extension > Custom Keyboard and click Next</p>
+					<img src="https://www.appcoda.com/wp-content/uploads/2014/10/custom_extension-509x300.png">
+					<p>Set Product Name</p>
+				</section>
+
+				<section>
+					<h2>View</h2>
+					<p>Add a TextView to the main View and center it so it completely covers the view.</p>
+				</section>
+
+				<section>
+					<h2>Add Keyboard To Simulator</h2>
+					<p>Navigate to Settings > General > Keyboard > Keyboards > Add New Keyboard and select [Product Name].</p>
+					<img src="http://www.appcoda.com/wp-content/uploads/2014/10/set-custom-keyboard.png">
+				</section>
+
+				<section>
+					<h2>Test It</h2>
+					<img src="https://www.appcoda.com/wp-content/uploads/2014/10/keyboard_default_view.png">
+				</section>
+
+				<section>
+					<h2>Add Keyboard Options</h2>
+					<pre><code class="hljs" data-trim contenteditable>
+let buttonTitles = ["Q", "W", "E", "R", "T", "Y"]
+var buttons = createButtons(buttonTitles)
+var topRow = UIView(frame: CGRectMake(0, 0, 320, 40))
+        
+for button in buttons {
+    topRow.addSubview(button)
+}
+        
+self.view.addSubview(topRow)
+        
+addConstraints(buttons, containingView: topRow)
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>Functions</h2>
+					<p>open KeyboardViewController.swift and add the following to the viewDidLoad()</p>
+					<pre><code class="hljs" data-trim contenteditable>
+func createButtons(titles: [String]) -&gt; [UIButton] {
+        
+    var buttons = [UIButton]()
+        
+    for title in titles {
+        let button = UIButton.buttonWithType(.System) as UIButton
+        button.setTitle(title, forState: .Normal)
+        button.setTranslatesAutoresizingMaskIntoConstraints(false)
+        button.backgroundColor = UIColor(white: 1.0, alpha: 1.0)
+        button.setTitleColor(UIColor.darkGrayColor(), forState: .Normal)
+        button.addTarget(self, action: "keyPressed:", forControlEvents: .TouchUpInside)
+        buttons.append(button)
+    }
+        
+    return buttons
+}
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>Functions (cont.)</h2>
+					<p>open KeyboardViewController.swift and add the following to the viewDidLoad()</p>
+					<pre><code class="hljs" data-trim contenteditable>
+func keyPressed(sender: AnyObject?) {
+    let button = sender as UIButton
+    let title = button.titleForState(.Normal)
+    (textDocumentProxy as UIKeyInput).insertText(title!)
+}
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>Functions (cont.)</h2>
+					<p>open KeyboardViewController.swift and add the following to the viewDidLoad()</p>
+					<pre><code class="hljs" data-trim contenteditable>
+func addConstraints(buttons: [UIButton], containingView: UIView){
+        
+        for (index, button) in enumerate(buttons) {
+            
+            var topConstraint = NSLayoutConstraint(item: button, attribute: .Top, relatedBy: .Equal, toItem: containingView, attribute: .Top, multiplier: 1.0, constant: 1)
+            
+            var bottomConstraint = NSLayoutConstraint(item: button, attribute: .Bottom, relatedBy: .Equal, toItem: containingView, attribute: .Bottom, multiplier: 1.0, constant: -1)
+            
+            var leftConstraint : NSLayoutConstraint!
+            
+            if index == 0 {
+                
+                leftConstraint = NSLayoutConstraint(item: button, attribute: .Left, relatedBy: .Equal, toItem: containingView, attribute: .Left, multiplier: 1.0, constant: 1)
+                
+            }else{
+                
+                leftConstraint = NSLayoutConstraint(item: button, attribute: .Left, relatedBy: .Equal, toItem: buttons[index-1], attribute: .Right, multiplier: 1.0, constant: 1)
+                
+                var widthConstraint = NSLayoutConstraint(item: buttons[0], attribute: .Width, relatedBy: .Equal, toItem: button, attribute: .Width, multiplier: 1.0, constant: 0)
+                
+                containingView.addConstraint(widthConstraint)
+            }
+            
+            var rightConstraint : NSLayoutConstraint!
+            
+            if index == buttons.count - 1 {
+                
+                rightConstraint = NSLayoutConstraint(item: button, attribute: .Right, relatedBy: .Equal, toItem: containingView, attribute: .Right, multiplier: 1.0, constant: -1)
+                
+            }else{
+                
+                rightConstraint = NSLayoutConstraint(item: button, attribute: .Right, relatedBy: .Equal, toItem: buttons[index+1], attribute: .Left, multiplier: 1.0, constant: -1)
+            }
+            
+            containingView.addConstraints([topConstraint, bottomConstraint, rightConstraint, leftConstraint])
+        }
+    }
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>Build It</h2>
+					<img src="https://www.appcoda.com/wp-content/uploads/2014/10/programmatic_ui.png">
+				</section>
+				
+
+				<!-- Final -->
+				<section style="text-align: left;">
+					<h1>THE END</h1>
+
+					<h2>Thank You</h2>
+
 					<p>
-						This is awesome.
+						- <a href="http://teebrysiewicz.github.io">Github: teebrysiewicz</a> <br>
+						- <a href="https://twitter.com/Tbrysiewicz">Twitter: @tbrysiewicz</a> <br>
+						- <a href="https://tobiasrobertbrysiewicz.com">TobiasRobertBrys</a>
 					</p>
 				</section>
 
-				<!-- First Slide -->
-				<section>Slide 2</section>\
 
-				<!-- Second Slide -->
-				<section>Slide 3</section>
-
-				
 			</div>
 		</div>
 
